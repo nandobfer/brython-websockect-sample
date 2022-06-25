@@ -79,6 +79,11 @@ def onDisconnect():
     connections.remove(sid)
     data = {'remove': connections}
     sockets.emit('connections', data, broadcast=True)
+    
+    data = {
+        'sid': sid
+        }
+    sockets.emit('2-player-leave', data, skip_sid=sid)
 
     print(f'disconnected {sid}')
 
