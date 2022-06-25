@@ -39,14 +39,15 @@ def onConnect():
     sockets.emit('connections', data, broadcast=True)
     
     data = {
-        'first': True,
+        'player': len(connections)+1,
         'sid': sid
         }
+    sockets.emit('player', data, to=sid)
     sockets.emit('2-player-join', data, skip_sid=sid)
     for player in connections:
         if player:
             data = {
-                'second': True,
+                'player': connections.index(player)+1,
                 'sid': player
             }
             sockets.emit('2-player-join', data, to=sid)
