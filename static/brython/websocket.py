@@ -1,6 +1,7 @@
 from browser import bind, document, websocket, window, html
 
 sid = None
+score = 0
 connections = []
 
 
@@ -8,6 +9,7 @@ class Client():
     def __init__(self, sid, element):
         self.sid = sid
         self.element = element
+        self.score = 0
 
 
 def on_connected(data):
@@ -45,15 +47,27 @@ def renderConnections(data):
 
     if 'add' in data:
         for sid in data['add']:
-            if not sid in connections:
-                client = Client(sid, html.P(f'{sid}', Id=sid))
+            client = getClient(sid)
+            if not client in connections:
+                client = Client(sid, html.P(f'{sid} - SCORE: 0', Id=sid))
                 element <= client.element
-                connections.append(sid)
+                connections.append(client)
     elif 'remove' in data:
-        for sid in connections:
-            if not sid in data['remove']:
-                document[sid].remove()
-                connections.remove(sid)
+        for client in connections:
+            if not client.sid in data['remove']:
+                document[client.sid].remove()
+                connections.remove(client)
+                
+def onScore(data):
+    for sid in data:
+        client = getClient(sid)
+        client.score = data[sid]
+        document[sid].text = f'{sid} - SCORE: {client.score}'
+        
+def getClient(sid):
+    for client in connections:
+        if sid == client.sid:
+            return client
 
 
 sio = None
@@ -67,19 +81,24 @@ def _open(ev):
     global sio
     # open a web socket
     # sio = websocket.WebSocket("sio://127.0.0.1:5000/")
-    sio = window.io.connect('localhost:5000/')
+    sio = window.io.connect('44.206.122.252:5001/')
     # bind functions to web socket events
     sio.on('connect', on_open)
     sio.on('connected', on_connected)
     sio.on('test', on_message)
     sio.on('disconnect', on_close)
     sio.on('connections', renderConnections)
+    sio.on('score', onScore)
 
 
 @ bind('#btn-send', 'click')
 def send(ev):
+    global score
     data = document["data"].value
     if data:
+        if data == '/score':
+            score += 1
+            sio.emit('score', score)
         sio.emit('test', data)
 
 

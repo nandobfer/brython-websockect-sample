@@ -1,7 +1,6 @@
 import os
 from flask import Flask, request, render_template, send_from_directory
 from flask_socketio import SocketIO, emit
-from numpy import broadcast
 
 app = Flask(__name__)
 sockets = SocketIO(app, ping_interval=1)
@@ -32,13 +31,35 @@ def onConnect():
     sid = request.sid
     ip = request.remote_addr
 
-    connections.append(sid)
 
     bigPrint(f'connected: {ip} - {sid}')
 
     sockets.emit('connected', sid)
     data = {'add': connections}
     sockets.emit('connections', data, broadcast=True)
+    
+    data = {
+        'first': True,
+        'sid': sid
+        }
+    sockets.emit('2-player-join', data, skip_sid=sid)
+    for player in connections:
+        if player:
+            data = {
+                'second': True,
+                'sid': player
+            }
+            sockets.emit('2-player-join', data, to=sid)
+    
+    connections.append(sid)
+
+@sockets.on('score')
+def onScore(score):
+    sid = request.sid    
+    bigPrint(f'player {sid} scored {score}')
+    data = {sid: score}
+    sockets.emit('score', data, broadcast=True)
+    
 
 
 @sockets.on('test')
@@ -64,4 +85,4 @@ def onDisconnect():
     # End of socketio events configuration
 
 
-sockets.run(app, debug=True, host="0.0.0.0", port=5000)
+sockets.run(app, debug=True, host="0.0.0.0", port=5001)
