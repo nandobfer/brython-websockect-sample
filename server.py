@@ -68,6 +68,15 @@ def onGetClientData(data):
     sockets.emit('get-server-data', data, skip_sid=sid)
 
 
+@sockets.on('get-client-ready')
+def onGetClientReady(data):
+    sid = request.sid
+    sockets.emit('get-server-ready', skip_sid=sid)
+
+    if len(connections) > 1:
+        sockets.emit('server-start-game')
+
+
 @sockets.on('test')
 def test(message):
     sid = request.sid
