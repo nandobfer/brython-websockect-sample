@@ -31,17 +31,16 @@ def onConnect():
     sid = request.sid
     ip = request.remote_addr
 
-
     bigPrint(f'connected: {ip} - {sid}')
 
     sockets.emit('connected', sid)
     data = {'add': connections}
     sockets.emit('connections', data, broadcast=True)
-    
+
     data = {
         'player': len(connections)+1,
         'sid': sid
-        }
+    }
     sockets.emit('player', data, to=sid)
     sockets.emit('2-player-join', data, skip_sid=sid)
     for player in connections:
@@ -51,16 +50,21 @@ def onConnect():
                 'sid': player
             }
             sockets.emit('2-player-join', data, to=sid)
-    
+
     connections.append(sid)
+
 
 @sockets.on('score')
 def onScore(score):
-    sid = request.sid    
+    sid = request.sid
     bigPrint(f'player {sid} scored {score}')
     data = {sid: score}
     sockets.emit('score', data, broadcast=True)
-    
+
+
+@sockets.on('get-client-data')
+def onGetClientData(data):
+    print(data)
 
 
 @sockets.on('test')
@@ -80,10 +84,10 @@ def onDisconnect():
     connections.remove(sid)
     data = {'remove': connections}
     sockets.emit('connections', data, broadcast=True)
-    
+
     data = {
         'sid': sid
-        }
+    }
     sockets.emit('2-player-leave', data, skip_sid=sid)
 
     print(f'disconnected {sid}')
