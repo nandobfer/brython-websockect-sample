@@ -6,6 +6,7 @@ app = Flask(__name__)
 sockets = SocketIO(app, ping_interval=1)
 
 connections = []
+ready = 0
 
 
 def bigPrint(*args):
@@ -70,10 +71,12 @@ def onGetClientData(data):
 
 @sockets.on('get-client-ready')
 def onGetClientReady(data):
+    global ready
     sid = request.sid
     sockets.emit('get-server-ready', skip_sid=sid)
+    ready += 1
 
-    if len(connections) > 1:
+    if ready == 2:
         sockets.emit('server-start-game')
 
 
