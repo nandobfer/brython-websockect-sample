@@ -29,6 +29,8 @@ def home():
 @sockets.on('connect')
 def onConnect():
     global connections
+    global ready
+    ready = 0
     sid = request.sid
     ip = request.remote_addr
 
