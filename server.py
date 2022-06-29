@@ -65,6 +65,12 @@ def onScore(score):
     sockets.emit('score', data, broadcast=True)
 
 
+@sockets.on('tap')
+def onTap():
+    sid = request.sid
+    sockets.emit('tap', skip_sid=sid)
+
+
 @sockets.on('get-client-data')
 def onGetClientData(data):
     sid = request.sid
