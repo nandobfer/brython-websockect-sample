@@ -64,7 +64,8 @@ def onScore(score):
 
 @sockets.on('get-client-data')
 def onGetClientData(data):
-    print(data)
+    sid = request.sid
+    sockets.emit('get-server-data', data, skip=sid)
 
 
 @sockets.on('test')
