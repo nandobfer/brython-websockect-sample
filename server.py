@@ -71,6 +71,12 @@ def onTap():
     sockets.emit('tap', skip_sid=sid)
 
 
+@sockets.on('pos')
+def onTap(data):
+    sid = request.sid
+    sockets.emit('pos', data, skip_sid=sid)
+
+
 @sockets.on('get-client-data')
 def onGetClientData(data):
     sid = request.sid
